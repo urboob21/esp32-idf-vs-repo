@@ -1,0 +1,24 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.adapterTargetName": "esp32",
+  "idf.openOcdConfigs": [
+    "interface/ftdi/esp32_devkitj_v1.cfg",
+    "target/esp32.cfg"
+],
+  "files.associations": {
+    "freertos.h": "c",
+    "task.h": "c",
+    "gpio.h": "c",
+    "stdio.h": "c",
+    "portmacro.h": "c",
+    "netdb.h": "c",
+    "queue.h": "c"
+  },
+  "idf.flashType": "UART",
+  "idf.portWin": "COM3",
+  "idf.pythonBinPathWin": "d:\\ESP_IDF_VS_TOOL\\python_env\\idf4.3_py3.8_env\\Scripts\\python.exe",
+  "idf.toolsPathWin": "d:\\ESP_IDF_VS_TOOL"
+}
+
+
+
