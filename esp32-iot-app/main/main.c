@@ -9,6 +9,7 @@
 #include "nvs_flash.h"
 #include "dht22.h"
 
+// GIT CHECK COMMIT
 void wifi_app_connected_events()
 {
 	// to do some thing
