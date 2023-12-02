@@ -72,3 +72,10 @@ input[type="checkbox"] {
     margin-top: 10px;
     color: #d11e1e;
 }
+#ip_address_label, #netmask_label, #gateway_label {
+	display:inline;
+}
+
+#disconnect_wifi {
+	display: none;
+}

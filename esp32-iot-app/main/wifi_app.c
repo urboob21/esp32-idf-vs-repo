@@ -28,6 +28,9 @@ static const char TAG[] = "___WIFI_APP___";
 // Used for returning the WiFi configuration
 wifi_config_t *wifi_config = NULL;
 
+// WIFI application callback - this
+static wifi_connected_event_callback_t wifi_connected_event_cb;
+
 // Used to track the number for retries when a connection attempt fails
 static int g_retry_number;
 
@@ -45,6 +48,26 @@ BaseType_t wifi_app_send_message(wifi_app_message_t msgID)
 	msg.msgId = msgID;
 	return xQueueSend(wifi_app_queue_handle, &msg, portMAX_DELAY);
 }
+
+//__________________________________________
+// The set/call back funtion define in here
+void wifi_app_call_callback()
+{
+	/**
+	 * In here: wifi_connected_event_cb is a pointer refer to the funtion that user want to execute
+	 * name: reference
+	 * name(): value of the funtion()
+	 * use can read the funtion pointer for acknowlegment
+	 */
+	wifi_connected_event_cb();
+}
+
+void wifi_app_set_callback(wifi_connected_event_callback_t cbFuntion)
+{
+	wifi_connected_event_cb = cbFuntion;
+}
+
+//__________________________________________
 
 /**
  * Connects the ESP32 to an external AP using the updated station configuration
@@ -272,13 +295,28 @@ static void wifi_app_task(void *pvParameters)
 			case WIFI_APP_MSG_STA_CONNECTED_GOT_IP:
 				ESP_LOGI(TAG, "WIFI_APP_MSG_STA_CONNECTED_GOT_IP");
 
+				// the esp32 connected to the host wifi in here
 				// rgb_led_wifi_connected();
 				http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
+				// Check for connection callback
+				if (wifi_connected_event_cb)
+				{
+					wifi_app_call_callback();
+				}
 
 				break;
 			case WIFI_APP_MSG_STA_DISCONNECTED:
 				ESP_LOGI(TAG, "WIFI_APP_MSG_STA_DISCONNECTED");
 
+				http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_FAIL);
+
+				break;
+
+			case WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT:
+				ESP_LOGI(TAG, "WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT");
+
+				g_retry_number = MAX_CONNECTION_RETRIES;
+				ESP_ERROR_CHECK(esp_wifi_disconnect());
 				http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_FAIL);
 
 				break;
