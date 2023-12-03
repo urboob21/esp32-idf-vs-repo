@@ -12,7 +12,12 @@
     "stdio.h": "c",
     "portmacro.h": "c",
     "netdb.h": "c",
-    "queue.h": "c"
+    "queue.h": "c",
+    "*.inc": "c",
+    "mqtt_client.h": "c",
+    "tasks_common.h": "c",
+    "mqtt_app.h": "c",
+    "esp_log.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",

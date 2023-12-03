@@ -8,11 +8,14 @@
 #include "wifi_app.h"
 #include "nvs_flash.h"
 #include "dht22.h"
+#include "mqtt_app.h"
 
 // GIT CHECK COMMIT
 void wifi_app_connected_events()
 {
 	// to do some thing
+	mqtt_app_start();
+
 }
 void app_main(void)
 {
