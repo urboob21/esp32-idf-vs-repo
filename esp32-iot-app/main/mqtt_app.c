@@ -7,9 +7,8 @@
 
 // Tag used for ESP Serial Console Message
 static const char TAG[] = "___MQTT_APP___";
-
-const uint8_t mqtt_eclipseprojects_io_pem_start[]   asm("_binary_mqtt_eclipseprojects_io_pem_start");
-
+extern const uint8_t mqtt_eclipseprojects_io_pem_start[]   asm("_binary_mqtt_eclipseprojects_io_pem_start");
+ extern const uint8_t mqtt_eclipseprojects_io_pem_end[]   asm("_binary_mqtt_eclipseprojects_io_pem_end");
 // Client instance
 esp_mqtt_client_handle_t client = NULL;
 
@@ -84,12 +83,15 @@ static void mqtt_event_handler(void *event_handler_arg,
 void mqtt_app_start(void)
 {
     ESP_LOGI(TAG, "STARTING MQTT");
-    esp_mqtt_client_config_t mqttConfig = {
-        .uri = "mqtts://660f28e90d254c3a969676062a264527.s2.eu.hivemq.cloud:8883",
-        .port= 8883,
-        .username="nphong2103",
-        .password="210301Phong",
-        .client_cert_pem=(const char *)mqtt_eclipseprojects_io_pem_start
+    const esp_mqtt_client_config_t mqttConfig = {
+        .broker = {
+            .address.uri = "mqtts://660f28e90d254c3a969676062a264527.s2.eu.hivemq.cloud:8883",
+            .verification.certificate = (const char *)mqtt_eclipseprojects_io_pem_start
+        },
+        .credentials ={               
+            .username= "nphong2103",
+            .authentication.password = "210301Phong"          
+        }
     };
 
     client = esp_mqtt_client_init(&mqttConfig);
