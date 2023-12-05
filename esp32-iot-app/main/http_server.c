@@ -305,7 +305,7 @@ static esp_err_t http_server_ota_update_handler(httpd_req_t *r)
 			else
 			{
 				printf(
-					"http_server_OTA_update_handler: Writing to partition subtype %d at offset 0x%d\r\n",
+					"http_server_OTA_update_handler: Writing to partition subtype %d at offset 0x%lx\r\n",
 					update_partition->subtype, update_partition->address);
 			}
 
@@ -331,7 +331,7 @@ static esp_err_t http_server_ota_update_handler(httpd_req_t *r)
 			const esp_partition_t *boot_partition =
 				esp_ota_get_boot_partition();
 			ESP_LOGI(TAG,
-					 "http_server_OTA_update_handler: Next boot partition subtype %d at offset 0x%d",
+					 "http_server_OTA_update_handler: Next boot partition subtype %d at offset 0x%lx",
 					 boot_partition->subtype, boot_partition->address);
 			flash_successful = true;
 		}

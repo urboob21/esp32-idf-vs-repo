@@ -8,11 +8,19 @@
 #include "wifi_app.h"
 #include "nvs_flash.h"
 #include "dht22.h"
+#include "mqtt_app.h"
 
+// GIT CHECK COMMIT
 void wifi_app_connected_events()
 {
 	// to do some thing
+	mqtt_app_start();
+
 }
+
+/**
+ * Entry point
+*/
 void app_main(void)
 {
 	// Initialize NVS
@@ -28,8 +36,8 @@ void app_main(void)
 	wifi_app_start();
 
 	// Start DHT
-	DHT22_task_start();
+	//DHT22_task_start();
 
-	// register the funtion callback MQTT when connected successfully wifi host
+	// Register the funtion callback MQTT when connected successfully wifi host
 	wifi_app_set_callback(*wifi_app_connected_events);
 }

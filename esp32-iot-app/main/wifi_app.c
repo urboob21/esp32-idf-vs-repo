@@ -21,6 +21,7 @@
 #include "rgb_led.h"
 #include "wifi_app.h"
 #include "http_server.h"
+#include "mqtt_app.h"
 
 // Tag used for ESP Serial Console Message
 static const char TAG[] = "___WIFI_APP___";
@@ -153,7 +154,7 @@ static void wifi_app_default_wifi_init()
 static void wifi_app_event_handler(void *event_handler_arg,
 								   esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-	ESP_LOGI(TAG, "Received the EVENT !");
+	ESP_LOGI(TAG, "Received the WIFI_APP EVENT !");
 	if (event_base == WIFI_EVENT)
 	{
 		// case of WIFI events
@@ -198,6 +199,9 @@ static void wifi_app_event_handler(void *event_handler_arg,
 			else
 			{
 				wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
+
+				// Disconnected the MQTT - not check $$$
+				mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
 			}
 
 			break;
@@ -298,6 +302,7 @@ static void wifi_app_task(void *pvParameters)
 				// the esp32 connected to the host wifi in here
 				// rgb_led_wifi_connected();
 				http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
+				
 				// Check for connection callback
 				if (wifi_connected_event_cb)
 				{
