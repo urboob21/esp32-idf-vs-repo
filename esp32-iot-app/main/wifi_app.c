@@ -199,6 +199,9 @@ static void wifi_app_event_handler(void *event_handler_arg,
 			else
 			{
 				wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
+
+				// Disconnected the MQTT - not check $$$
+				mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
 			}
 
 			break;

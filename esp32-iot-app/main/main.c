@@ -17,6 +17,10 @@ void wifi_app_connected_events()
 	mqtt_app_start();
 
 }
+
+/**
+ * Entry point
+*/
 void app_main(void)
 {
 	// Initialize NVS
