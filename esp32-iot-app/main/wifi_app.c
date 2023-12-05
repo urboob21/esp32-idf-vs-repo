@@ -213,7 +213,6 @@ static void wifi_app_event_handler(void *event_handler_arg,
 			ESP_LOGI(TAG, "IP_EVENT_STA_GOT_IP");
 
 			wifi_app_send_message(WIFI_APP_MSG_STA_CONNECTED_GOT_IP);
-			mqtt_app_start();
 			break;
 		}
 	}

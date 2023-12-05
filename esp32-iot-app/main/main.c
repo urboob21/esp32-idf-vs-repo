@@ -32,8 +32,8 @@ void app_main(void)
 	wifi_app_start();
 
 	// Start DHT
-	DHT22_task_start();
+	//DHT22_task_start();
 
-	// register the funtion callback MQTT when connected successfully wifi host
+	// Register the funtion callback MQTT when connected successfully wifi host
 	wifi_app_set_callback(*wifi_app_connected_events);
 }
