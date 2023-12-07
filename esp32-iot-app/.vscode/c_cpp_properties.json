@@ -10,7 +10,7 @@
                 "${config:idf.espAdfPathWin}/components/**",
                 "${workspaceFolder}/**"
             ],
-         "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+        "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "browse": {
                 "path": [
                     "${config:idf.espIdfPath}/components",

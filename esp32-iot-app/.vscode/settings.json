@@ -19,7 +19,9 @@
     "mqtt_app.h": "c",
     "esp_log.h": "c",
     "esp_tls.h": "c",
-    "esp_ota_ops.h": "c"
+    "esp_ota_ops.h": "c",
+    "wifi_app.h": "c",
+    "nvs_app.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",

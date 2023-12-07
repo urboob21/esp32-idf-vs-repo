@@ -14,7 +14,7 @@
 void wifi_app_connected_events()
 {
 	// to do some thing
-	mqtt_app_start();
+	//mqtt_app_start();
 
 }
 
