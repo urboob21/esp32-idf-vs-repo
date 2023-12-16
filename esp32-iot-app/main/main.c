@@ -9,12 +9,12 @@
 #include "nvs_flash.h"
 #include "dht22.h"
 #include "mqtt_app.h"
-
+#include "gpio_app.h"
 // GIT CHECK COMMIT
 void wifi_app_connected_events()
 {
 	// to do some thing
-	//mqtt_app_start();
+	mqtt_app_start();
 
 }
 
@@ -32,12 +32,15 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
+	// Start flame + warning sensor
+	gpio_app_task_start();
+	
 	// Start Wifi
-	wifi_app_start();
+	//wifi_app_start();
 
 	// Start DHT
 	//DHT22_task_start();
 
 	// Register the funtion callback MQTT when connected successfully wifi host
-	wifi_app_set_callback(*wifi_app_connected_events);
+	//wifi_app_set_callback(*wifi_app_connected_events);
 }
