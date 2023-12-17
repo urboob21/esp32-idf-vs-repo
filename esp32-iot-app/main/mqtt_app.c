@@ -16,9 +16,13 @@
 #include "tasks_common.h"
 #include "mqtt_app.h"
 #include "esp_tls.h"
+#include "gpio_app.h"
 
 // Tag used for ESP Serial Console Message
 static const char TAG[] = "___MQTT_APP___";
+
+// Task Handle
+TaskHandle_t tHandler_mqtt_app = NULL;
 
 // Embedded certificate .bem file
 extern const uint8_t mqtt_eclipseprojects_io_pem_start[] asm("_binary_mqtt_eclipseprojects_io_pem_start");
@@ -30,8 +34,8 @@ static QueueHandle_t mqtt_app_queue_handle;
 // Client instance
 esp_mqtt_client_handle_t mqtt_client = NULL;
 
-// Wifi connect status
-static int g_mqtt_connect_status = MQTT_APP_CONNECT_NONE;
+// MQTT connect status
+int g_mqtt_connect_status = MQTT_APP_CONNECT_NONE;
 /**
  * Sends message function
  */
@@ -42,6 +46,75 @@ BaseType_t mqtt_app_send_message(mqtt_app_message_id_e msgId)
     return xQueueSend(mqtt_app_queue_handle, &msg, portMAX_DELAY);
 }
 
+char *createString(const char *msgTopic, uint8_t msgLenTopic)
+{
+    // Allocate memory for the string, including space for the null terminator
+    char *myString = malloc(msgLenTopic + 1);
+
+    // Check if memory allocation was successful
+    if (myString == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Copy the characters from msgTopic to myString
+    strncpy(myString, msgTopic, msgLenTopic);
+
+    // Ensure null termination
+    myString[msgLenTopic] = '\0';
+
+    return myString;
+}
+
+/**
+ * Sends message function with topic/data
+ */
+BaseType_t mqtt_app_send_message_with(mqtt_app_message_id_e msgId, char *topic, uint8_t lenTopic, char *data, uint8_t lenData)
+{
+    mqtt_app_message_t msg;
+    msg.msgId = msgId;
+    msg.msgTopic = topic;
+    msg.msgLenTopic = lenTopic;
+    msg.msgData = data;
+    msg.msgLenData = lenData;
+    return xQueueSend(mqtt_app_queue_handle, &msg, portMAX_DELAY);
+}
+
+/**
+ * Proccess received mqtt data from specific topic
+ */
+static void mqtt_app_proccess_received_data(char *pTopicBuff, uint8_t lenTopic, char *pDataBuff, uint8_t lenData)
+{
+    /**
+     * tocpic: device_buzzer
+     * data: [cmd] ON/OF
+     *
+     */
+    // The result like String
+
+    char *strTopic = createString(pTopicBuff, lenTopic);
+
+    char *strData = createString(pDataBuff, lenData);
+
+    printf("proccess: %s : %s \n", strTopic, strData);
+    if (strcmp(strTopic, MQTT_APP_TOPIC_SUB_BUZZ) == 0)
+    {
+        bool state = false;
+        if (strcmp(strData, "ON") == 0)
+        {
+            state = true;
+        }
+        else if (strcmp(strData, "OFF") == 0)
+        {
+            state = false;
+        }
+        gpio_app_turn_warning(state);
+    }
+
+    free(strTopic);
+    free(strData);
+}
 
 /*
  * @brief Event handler registered to receive MQTT events
@@ -58,16 +131,18 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32, base, event_id);
     esp_mqtt_event_handle_t event = event_data;
     esp_mqtt_client_handle_t client = event->client;
-    //int msg_id;
+    // int msg_id;
     switch ((esp_mqtt_event_id_t)event_id)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+        g_mqtt_connect_status = MQTT_APP_CONNECT_SUCCESS;
         mqtt_app_send_message(MQTT_APP_MSG_CONNECTED);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+        g_mqtt_connect_status = MQTT_APP_CONNECT_NONE;
         mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
         break;
 
@@ -83,19 +158,24 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_PUBLISHED:
         ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
 
-      //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+        //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         break;
 
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
-        if (strncmp(event->data, "send binary please", event->data_len) == 0) {
+        if (strncmp(event->data, "send binary please", event->data_len) == 0)
+        {
             ESP_LOGI(TAG, "Sending the binary");
-            //send_binary(client);
+            // send_binary(client);
         }
+
+        mqtt_app_proccess_received_data(event->topic, event->topic_len, event->data, event->data_len);
+        memset(event->data, 0, event->data_len);
+
         break;
-        
+
     case MQTT_EVENT_ERROR:
         ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
         if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
@@ -136,7 +216,6 @@ static void mqtt_app_config()
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
 }
 
-
 /**
  * Main task for the MQTT application
  */
@@ -150,8 +229,6 @@ static void mqtt_app_task()
     // Register the handler events
     esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
 
-
-
     // Send the MQTT_APP_MSG_START
     mqtt_app_send_message(MQTT_APP_MSG_START);
     int msg_id;
@@ -162,19 +239,28 @@ static void mqtt_app_task()
             switch (msg.msgId)
             {
             case MQTT_APP_MSG_START:
-                 // Start connect MQTT client
+                // Start connect MQTT client
                 ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_client));
 
                 break;
 
             case MQTT_APP_MSG_CONNECTED:
+
+                // when connected, subscribe the declared topics
                 msg_id = esp_mqtt_client_subscribe(mqtt_client, MQTT_APP_TOPIC_SUB, 0);
+                msg_id = esp_mqtt_client_subscribe(mqtt_client, MQTT_APP_TOPIC_SUB_BUZZ, 0);
 
                 break;
 
             case MQTT_APP_MSG_DISCONNECTED:
                 // Stop connect MQTT client
-                ESP_ERROR_CHECK(esp_mqtt_client_stop(mqtt_client));
+                ESP_ERROR_CHECK(esp_mqtt_client_disconnect(mqtt_client));
+
+                break;
+
+            case MQTT_APP_MSG_RECONNECT:
+                // Re-connect MQTT client
+                ESP_ERROR_CHECK(esp_mqtt_client_reconnect(mqtt_client));
 
                 break;
 
@@ -184,9 +270,16 @@ static void mqtt_app_task()
                 break;
 
             case MQTT_APP_MSG_PUBLISHED:
-                msg_id = esp_mqtt_client_publish(mqtt_client, MQTT_APP_TOPIC_PUB, "yeu quynh truc", 0, 0, 0);
+                char *topic = createString(msg.msgTopic, msg.msgLenTopic);
 
-                break;
+                char *data = createString(msg.msgData, msg.msgLenData);
+                printf(topic);
+                printf(data);
+                msg_id = esp_mqtt_client_publish(mqtt_client, topic, data, msg.msgLenData + 1, 0, 0);
+
+                // Don't forget to free the allocated memory when you are done using the strings
+                free(topic);
+                free(data);
 
             default:
                 break;
@@ -201,13 +294,23 @@ static void mqtt_app_task()
 void mqtt_app_start(void)
 {
 
-    ESP_LOGI(TAG, "STARTING MQTT APPLICATION");
+    if (tHandler_mqtt_app == NULL)
+    {
+        ESP_LOGI(TAG, "STARTING MQTT APPLICATION");
 
-    // Create the queue msg
-    mqtt_app_queue_handle = xQueueCreate(3, sizeof(mqtt_app_message_t));
+        // Create the queue msg
+        mqtt_app_queue_handle = xQueueCreate(3, sizeof(mqtt_app_message_t));
 
-    // Start the MQTT application task
-    xTaskCreatePinnedToCore(&mqtt_app_task, "mqtt_app_task", MQTT_APP_TASK_STACK_SIZE, NULL, MQTT_APP_TASK_PRIORITY, NULL, MQTT_APP_TASK_CORE_ID);
+        // Start the MQTT application task
+        xTaskCreatePinnedToCore(&mqtt_app_task, "mqtt_app_task", MQTT_APP_TASK_STACK_SIZE, NULL, MQTT_APP_TASK_PRIORITY, &tHandler_mqtt_app, MQTT_APP_TASK_CORE_ID);
+    }
+    else
+    {
+
+        ESP_LOGI(TAG, "RECONNECT MQTT APPLICATION");
+        // Send the MQTT_APP_MSG_START
+        mqtt_app_send_message(MQTT_APP_MSG_RECONNECT);
+    }
 }
 
 /**
@@ -215,4 +318,10 @@ void mqtt_app_start(void)
  */
 void mqtt_app_stop()
 {
+    if (tHandler_mqtt_app)
+    {
+        vTaskDelete(tHandler_mqtt_app);
+        ESP_LOGI(TAG, "STOPPING MQTT APPLICATION");
+        tHandler_mqtt_app = NULL;
+    }
 }

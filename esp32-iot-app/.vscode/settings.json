@@ -21,7 +21,13 @@
     "esp_tls.h": "c",
     "esp_ota_ops.h": "c",
     "wifi_app.h": "c",
-    "nvs_app.h": "c"
+    "nvs_app.h": "c",
+    "gpio_app.h": "c",
+    "sstream": "c",
+    "regex": "c",
+    "dht22.h": "c",
+    "cstring": "c",
+    "string.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",

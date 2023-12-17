@@ -195,6 +195,10 @@ static void wifi_app_event_handler(void *event_handler_arg,
 		case WIFI_EVENT_STA_DISCONNECTED:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED");
 
+			// Disconnected the MQTT 
+			mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
+
+			// malloc
 			wifi_event_sta_disconnected_t *wifi_event_sta_disconnected = (wifi_event_sta_disconnected_t *)malloc(sizeof(wifi_event_sta_disconnected_t));
 			*wifi_event_sta_disconnected = *((wifi_event_sta_disconnected_t *)event_data);
 			printf("WIFI_EVENT_STA_DISCONNECTED, reason code %d\n", wifi_event_sta_disconnected->reason);
@@ -207,9 +211,6 @@ static void wifi_app_event_handler(void *event_handler_arg,
 			else
 			{
 				wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
-
-				// Disconnected the MQTT - not check $$$
-				//mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
 			}
 
 			break;
@@ -309,11 +310,11 @@ static void wifi_app_task(void *pvParameters)
 
 			case WIFI_APP_MSG_START_HTTP_SERVER:
 				ESP_LOGI(TAG, "WIFI_APP_MSG_START_HTTP_SERVER");
-				// rgb_led_http_server_started();
+				rgb_led_http_server_started();
 				http_server_start();
 				break;
 
-			case WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER: //btn connect
+			case WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER: // btn connect
 				ESP_LOGI(TAG, "WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER");
 
 				xEventGroupSetBits(wifi_app_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
@@ -355,6 +356,7 @@ static void wifi_app_task(void *pvParameters)
 				// Check for connection callback
 				if (wifi_connected_event_cb)
 				{
+					ESP_LOGI(TAG, "WIFI_APP_MSG_STA_CONNECTED_GOT_IP - PREPARE FOR MQTT");
 					wifi_app_call_callback();
 				}
 

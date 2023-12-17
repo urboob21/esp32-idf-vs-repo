@@ -39,16 +39,21 @@ static void gpio_app_detect_fire_task()
 }
 
 /**
- * gpio_app task
+ * task ON/OF  warning task
  */
-static void gpio_app_turn_on_warning_task()
+void gpio_app_turn_warning_task(bool state)
 {
     vTaskSuspend(NULL);
     for (;;)
     {
-        gpio_set_level(GPIO_APP_PIN_BUZ, 1);
+        gpio_set_level(GPIO_APP_PIN_BUZ, state);
         vTaskSuspend(turnOnWarningHandle);
     }
+}
+
+void gpio_app_turn_warning(bool state){
+     printf("Warning turn %d \n",state);
+    gpio_set_level(GPIO_APP_PIN_BUZ, state);
 }
 
 /**

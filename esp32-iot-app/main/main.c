@@ -33,14 +33,14 @@ void app_main(void)
 	ESP_ERROR_CHECK(ret);
 
 	// Start flame + warning sensor
-	gpio_app_task_start();
+	 gpio_app_task_start();
 	
 	// Start Wifi
-	//wifi_app_start();
+	wifi_app_start();
 
 	// Start DHT
-	//DHT22_task_start();
+	DHT22_task_start();
 
 	// Register the funtion callback MQTT when connected successfully wifi host
-	//wifi_app_set_callback(*wifi_app_connected_events);
+	wifi_app_set_callback(*wifi_app_connected_events);
 }

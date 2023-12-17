@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #ifndef MAIN_GPIO_APP_H
 #define MAIN_GPIO_APP_H
 
@@ -11,4 +12,5 @@
  */
 void gpio_app_task_start(void);
 
+void gpio_app_turn_warning(bool state);
 #endif

@@ -20,6 +20,9 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stddef.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -28,7 +31,7 @@
 #include "dht22.h"
 #include "DHT22.h"
 #include "tasks_common.h"
-
+#include "mqtt_app.h"
 // == global defines =============================================
 
 static const char *TAG = "DHT";
@@ -36,6 +39,8 @@ static const char *TAG = "DHT";
 int DHTgpio = 4;				// my default DHT pin = 4
 float humidity = 0.;
 float temperature = 0.;
+
+extern int g_mqtt_connect_status;
 
 // == set the DHT used pin=========================================
 
@@ -253,6 +258,17 @@ static void DHT22_task(void *pvParameter) {
 
 		printf("Hum %.1f\n", getHumidity());
 		printf("Tmp %.1f\n", getTemperature());
+
+		// Public to mqtt if connect success
+		if(g_mqtt_connect_status == MQTT_APP_CONNECT_SUCCESS){
+			 char humiBuff[5];
+			 sprintf(humiBuff,"%.1f",getHumidity());
+			 mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED,MQTT_APP_TOPIC_PUB_HUMI,strlen(MQTT_APP_TOPIC_PUB_HUMI),humiBuff,6);
+
+			 char temBuff[5];
+			 sprintf(temBuff,"%.1f",getTemperature());
+			 mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED,MQTT_APP_TOPIC_PUB_TEMP,strlen(MQTT_APP_TOPIC_PUB_TEMP),temBuff,6);
+		}
 
 		// Wait at least 2 seconds before reading again
 		// The interval of the whole process must be more than 2 seconds

@@ -6,9 +6,12 @@
 #define MQTT_APP_PASSWORD "210301Phong"
 #define MQTT_APP_TOPIC_SUB "topic/request"
 #define MQTT_APP_TOPIC_PUB "topic/reply"
+#define MQTT_APP_TOPIC_SUB_BUZZ "topic/request_buzz"
+#define MQTT_APP_TOPIC_PUB_TEMP "topic/push_temp"
+#define MQTT_APP_TOPIC_PUB_HUMI "topic/push_humi"
 
 /**
- * Connection status for Wifi
+ * Connection status for MQTT
  */
 typedef enum mqtt_app_connect_status
 {
@@ -24,6 +27,7 @@ typedef enum
 	MQTT_APP_MSG_START = 0,
 	MQTT_APP_MSG_CONNECTED,
 	MQTT_APP_MSG_DISCONNECTED,
+	MQTT_APP_MSG_RECONNECT,
 	MQTT_APP_MSG_SUBSCRIBED,
 	MQTT_APP_MSG_PUBLISHED,
 
@@ -35,12 +39,21 @@ typedef enum
 typedef struct
 {
 	mqtt_app_message_id_e msgId;
+	char *msgTopic;
+	uint8_t msgLenTopic;
+	char *msgData;
+	uint8_t msgLenData;
 } mqtt_app_message_t;
 
 /**
  * Sends message function
  */
 BaseType_t mqtt_app_send_message(mqtt_app_message_id_e msg);
+
+/**
+ * Sends message function with topic/data
+ */
+BaseType_t mqtt_app_send_message_with(mqtt_app_message_id_e msgId, char *topic, uint8_t lenTopic, char *data, uint8_t lenData);
 
 /**
  * Start mqtt client when wifi connected station mode
