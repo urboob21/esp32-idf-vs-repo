@@ -17,6 +17,7 @@
 #include "mqtt_app.h"
 #include "esp_tls.h"
 #include "gpio_app.h"
+#include "rgb_led.h"
 
 // Tag used for ESP Serial Console Message
 static const char TAG[] = "___MQTT_APP___";
@@ -137,6 +138,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
         g_mqtt_connect_status = MQTT_APP_CONNECT_SUCCESS;
+        rgb_led_mqtt_connected();
         mqtt_app_send_message(MQTT_APP_MSG_CONNECTED);
         break;
 
@@ -144,6 +146,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
         g_mqtt_connect_status = MQTT_APP_CONNECT_NONE;
         mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
+
         break;
 
     case MQTT_EVENT_SUBSCRIBED:

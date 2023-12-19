@@ -5,7 +5,7 @@
 #include <driver/gpio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
+#include "rgb_led.h"
 TaskHandle_t turnOnWarningHandle = NULL;
 
 /**
@@ -33,6 +33,7 @@ static void gpio_app_detect_fire_task()
             printf("Flame dected => the fire is detected \n");
             // vTaskResume(turnOnWarningHandle);
             gpio_set_level(GPIO_APP_PIN_BUZ, 1);
+            rgb_led_display(RGB_COLOR_RED);
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
@@ -51,9 +52,19 @@ void gpio_app_turn_warning_task(bool state)
     }
 }
 
-void gpio_app_turn_warning(bool state){
-     printf("Warning turn %d \n",state);
+void gpio_app_turn_warning(bool state)
+{
+    printf("Warning turn %d \n", state);
     gpio_set_level(GPIO_APP_PIN_BUZ, state);
+
+    if (state)
+    {
+        rgb_led_display(RGB_COLOR_RED);
+    }
+    else if (!state)
+    {
+        rgb_led_display(RGB_COLOR_GREEN);
+    }
 }
 
 /**

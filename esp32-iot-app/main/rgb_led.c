@@ -112,9 +112,13 @@ void rgb_led_http_server_started(void) {
 }
 
 void rgb_led_wifi_app_started(void) {
-	rgb_led_display(255, 102, 255);
+	rgb_led_display(RGB_COLOR_YELLOW);
 }
 
 void rgb_led_wifi_connected(void) {
 	rgb_led_display(0, 255, 153);
+}
+
+void rgb_led_mqtt_connected(void) {
+	rgb_led_display(RGB_COLOR_GREEN);
 }
