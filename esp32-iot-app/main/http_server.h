@@ -47,6 +47,7 @@ typedef struct
 } http_server_queue_message_t;
 
 BaseType_t http_server_monitor_send_message(http_server_message_id_e msgId);
+
 /**
  * Start the HTTP Server
  */

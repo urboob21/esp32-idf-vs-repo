@@ -33,11 +33,6 @@ typedef struct {
 } ledc_info_t;
 
 /**
- * Color to indicate
- */
-void rgb_led_test_started();
-
-/**
  * User R-G-B color
  */
 void rgb_led_display(uint8_t r,uint8_t g,uint8_t b);
@@ -61,4 +56,5 @@ void rgb_led_wifi_connected(void);
  * Color indicate mqtt connected
 */
 void rgb_led_mqtt_connected(void);
+
 #endif /* MAIN_RGB_LED_H_ */

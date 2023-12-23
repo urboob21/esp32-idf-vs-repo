@@ -20,7 +20,7 @@
 #include "rgb_led.h"
 
 // Tag used for ESP Serial Console Message
-static const char TAG[] = "___MQTT_APP___";
+static const char TAG[] = "MQTT Application";
 
 // Task Handle
 TaskHandle_t tHandler_mqtt_app = NULL;
@@ -299,7 +299,7 @@ void mqtt_app_start(void)
 
     if (tHandler_mqtt_app == NULL)
     {
-        ESP_LOGI(TAG, "STARTING MQTT APPLICATION");
+        ESP_LOGI(TAG, "Starting MQTT Application");
 
         // Create the queue msg
         mqtt_app_queue_handle = xQueueCreate(3, sizeof(mqtt_app_message_t));
@@ -310,7 +310,7 @@ void mqtt_app_start(void)
     else
     {
 
-        ESP_LOGI(TAG, "RECONNECT MQTT APPLICATION");
+        ESP_LOGI(TAG, "Reconnect MQTT Application");
         // Send the MQTT_APP_MSG_START
         mqtt_app_send_message(MQTT_APP_MSG_RECONNECT);
     }
@@ -324,7 +324,7 @@ void mqtt_app_stop()
     if (tHandler_mqtt_app)
     {
         vTaskDelete(tHandler_mqtt_app);
-        ESP_LOGI(TAG, "STOPPING MQTT APPLICATION");
+        ESP_LOGI(TAG, "Stopping MQTT Application");
         tHandler_mqtt_app = NULL;
     }
 }

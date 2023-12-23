@@ -246,7 +246,7 @@ int readDHT() {
 /**
  * DHT22 Sensor task
  */
-static void DHT22_task(void *pvParameter) {
+static void dht22_task(void *pvParameter) {
 	setDHTgpio(DHT_GPIO);
 	printf("Starting DHT task\n\n");
 
@@ -276,8 +276,8 @@ static void DHT22_task(void *pvParameter) {
 	}
 }
 
-void DHT22_task_start(void) {
-	xTaskCreatePinnedToCore(&DHT22_task, "DHT22_task", DHT22_TASK_STACK_SIZE,
+void dht22_task_start(void) {
+	xTaskCreatePinnedToCore(&dht22_task, "DHT22_task", DHT22_TASK_STACK_SIZE,
 			NULL, DHT22_TASK_PRIORITY, NULL, DHT22_TASK_CORE_ID);
 }
 

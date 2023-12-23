@@ -28,7 +28,8 @@
     "dht22.h": "c",
     "cstring": "c",
     "string.h": "c",
-    "rgb_led.h": "c"
+    "rgb_led.h": "c",
+    "ledc.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",

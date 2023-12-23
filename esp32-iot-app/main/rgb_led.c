@@ -6,7 +6,6 @@
  */
 
 #include <stdbool.h>
-
 #include <driver/ledc.h>
 #include "rgb_led.h"
 
@@ -22,7 +21,8 @@ bool g_rgb_led_pwm_init = false;
  * MODE
  * TIMER CONFIG
  */
-static void rgb_led_pwm_init() {
+static void rgb_led_pwm_init()
+{
 	// output 1 - red pin
 	ledc_channel[0].channel = LEDC_CHANNEL_0;
 	ledc_channel[0].gpio = RGB_GPIO_LED_RED;
@@ -43,20 +43,27 @@ static void rgb_led_pwm_init() {
 
 	// Timer Configuration -  timer 0
 	ledc_timer_config_t rgb_timer_config = {
-			.duty_resolution = LEDC_TIMER_8_BIT, .freq_hz = 100, .speed_mode =
-					LEDC_HIGH_SPEED_MODE, .timer_num = LEDC_TIMER_0 };
+		.duty_resolution = LEDC_TIMER_8_BIT, .freq_hz = 100, .speed_mode = LEDC_HIGH_SPEED_MODE, .timer_num = LEDC_TIMER_0};
 	ledc_timer_config(&rgb_timer_config);
 
 	// Channel Configuration - 0,1,2
 	for (uint8_t rgb_channel = 0; rgb_channel < RGB_CHANNEL_NUM;
-			rgb_channel++) {
+		 rgb_channel++)
+	{
 
-		ledc_channel_config_t rgb_channel_config = { .channel =
-				ledc_channel[rgb_channel].channel, .duty = 0, .hpoint = 0,
-				.gpio_num = ledc_channel[rgb_channel].gpio, .intr_type =
-						LEDC_INTR_DISABLE, .speed_mode =
-						ledc_channel[rgb_channel].mode, .timer_sel =
-						ledc_channel[rgb_channel].timer_index, };
+		ledc_channel_config_t rgb_channel_config = {
+			.channel =
+				ledc_channel[rgb_channel].channel,
+			.duty = 0,
+			.hpoint = 0,
+			.gpio_num = ledc_channel[rgb_channel].gpio,
+			.intr_type =
+				LEDC_INTR_DISABLE,
+			.speed_mode =
+				ledc_channel[rgb_channel].mode,
+			.timer_sel =
+				ledc_channel[rgb_channel].timer_index,
+		};
 		ledc_channel_config(&rgb_channel_config);
 	}
 
@@ -67,7 +74,8 @@ static void rgb_led_pwm_init() {
 /**
  * Sets the color
  */
-static void rgb_led_set_color(uint8_t red, uint8_t green, uint8_t blue) {
+static void rgb_led_set_color(uint8_t red, uint8_t green, uint8_t blue)
+{
 
 	// Set duty PWM based on value
 	// 0 - 255
@@ -85,21 +93,10 @@ static void rgb_led_set_color(uint8_t red, uint8_t green, uint8_t blue) {
 	ledc_update_duty(ledc_channel[2].mode, ledc_channel[2].channel);
 }
 
-// Display the color on led
-void rgb_led_test_started() {
-
-	// Check init pwm ??
-	if (!g_rgb_led_pwm_init) {
-		rgb_led_pwm_init();
-	}
-
-	// Set the specific color
-	rgb_led_set_color(255, 0, 0);
-}
-
-void rgb_led_display(uint8_t r, uint8_t g, uint8_t b) {
-	// Check init pwm ??
-	if (!g_rgb_led_pwm_init) {
+void rgb_led_display(uint8_t r, uint8_t g, uint8_t b)
+{
+	if (!g_rgb_led_pwm_init)
+	{
 		rgb_led_pwm_init();
 	}
 
@@ -107,18 +104,22 @@ void rgb_led_display(uint8_t r, uint8_t g, uint8_t b) {
 	rgb_led_set_color(r, g, b);
 }
 
-void rgb_led_http_server_started(void) {
+void rgb_led_http_server_started(void)
+{
 	rgb_led_display(204, 255, 51);
 }
 
-void rgb_led_wifi_app_started(void) {
+void rgb_led_wifi_app_started(void)
+{
 	rgb_led_display(RGB_COLOR_YELLOW);
 }
 
-void rgb_led_wifi_connected(void) {
+void rgb_led_wifi_connected(void)
+{
 	rgb_led_display(0, 255, 153);
 }
 
-void rgb_led_mqtt_connected(void) {
+void rgb_led_mqtt_connected(void)
+{
 	rgb_led_display(RGB_COLOR_GREEN);
 }

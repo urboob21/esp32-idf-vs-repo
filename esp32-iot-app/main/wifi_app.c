@@ -52,7 +52,7 @@ esp_netif_t *esp_netif_ap = NULL;
 
 /**
  * Send the message to queue
-*/
+ */
 BaseType_t wifi_app_send_message(wifi_app_message_t msgID)
 {
 	wifi_app_queue_message_t msg;
@@ -62,7 +62,7 @@ BaseType_t wifi_app_send_message(wifi_app_message_t msgID)
 
 /**
  * Get Wifi config
-*/
+ */
 wifi_config_t *wifi_app_get_wifi_config(void)
 {
 	return wifi_config;
@@ -82,7 +82,7 @@ void wifi_app_call_callback()
 
 /**
  * Set callback function
-*/
+ */
 void wifi_app_set_callback(wifi_connected_event_callback_t cbFuntion)
 {
 	wifi_connected_event_cb = cbFuntion;
@@ -263,7 +263,7 @@ static void wifi_app_event_handler_init()
 
 /**
  * Wifi config
-*/
+ */
 static void wifi_app_config()
 {
 	// Allocate memory for the wifi configuration
@@ -298,7 +298,7 @@ static void wifi_app_task(void *pvParameters)
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	ESP_LOGI(TAG, "Wifi app start successfully.");
-	
+
 	wifi_app_send_message(WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS);
 
 	for (;;)
@@ -334,7 +334,7 @@ static void wifi_app_task(void *pvParameters)
 				http_server_start();
 				break;
 
-			case WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER: 
+			case WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER:
 				ESP_LOGI(TAG, "WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER");
 
 				xEventGroupSetBits(wifi_app_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
@@ -447,4 +447,3 @@ void wifi_app_start()
 							WIFI_APP_TASK_STACK_SIZE, NULL, WIFI_APP_TASK_PRIORITY, NULL,
 							WIFI_APP_TASK_CORE_ID);
 }
-

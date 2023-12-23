@@ -10,12 +10,10 @@
 #include "dht22.h"
 #include "mqtt_app.h"
 #include "gpio_app.h"
-// GIT CHECK COMMIT
-void wifi_app_connected_events()
-{
-	// to do some thing
-	mqtt_app_start();
 
+void wifi_app_register_connected_events()
+{
+	mqtt_app_start();
 }
 
 /**
@@ -36,11 +34,11 @@ void app_main(void)
 	gpio_app_task_start();
 	
 	// Start DHT
-	DHT22_task_start();
+	dht22_task_start();
 
 	// Start Wifi
 	wifi_app_start();
 
 	// Register the funtion callback MQTT when connected successfully wifi host
-	wifi_app_set_callback(*wifi_app_connected_events);
+	wifi_app_set_callback(*wifi_app_register_connected_events);
 }
