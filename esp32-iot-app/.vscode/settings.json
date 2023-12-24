@@ -94,7 +94,9 @@
     "ctype.h": "c",
     "handle.h": "c",
     "lcd2004_app.h": "c",
-    "lcd.h": "c"
+    "lcd.h": "c",
+    "mq2.h": "c",
+    "esp_adc_cal.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",

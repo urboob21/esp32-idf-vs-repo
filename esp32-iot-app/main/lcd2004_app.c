@@ -7,6 +7,7 @@
 #include "lcd.h"
 #include "config.h"
 #include "tasks_common.h"
+#include "dht22.h"
 static const char *TAG = "LCD_2004";
 
 // Queue handle
@@ -32,6 +33,7 @@ BaseType_t lcd2004_app_send_message(lcd2004_app_id_message_t msgID)
  */
 static void lcd2004_app_task(void *pvParameters)
 {
+    initialise();
     char str[80];
     // Store a message from Queue message
     lcd2004_app_message_t msg;
@@ -58,9 +60,11 @@ static void lcd2004_app_task(void *pvParameters)
 
             case LCD2004_MSG_DISPLAY_TEMHUM:
                 lcd_set_cursor(&lcd_handle, 0, 1);
-                sprintf(str, "Temperature :");
+                sprintf(str, "Temperature : %.1f",getTemperature());
+                lcd_write_str(&lcd_handle,str);
                 lcd_set_cursor(&lcd_handle, 0, 2);
-                sprintf(str, "Humidity :");
+                sprintf(str, "Humidity : %.1f",getHumidity());
+                lcd_write_str(&lcd_handle,str);
                 break;
 
             case LCD2004_MSG_ON_WARNING:
@@ -82,15 +86,15 @@ static void lcd2004_app_task(void *pvParameters)
 
 void lcd2004_app_start(void)
 {
-    initialise();
+   
 
     // Create Message Queue
     lcd2004_app_queue_handle = xQueueCreate(3, sizeof(lcd2004_app_message_t));
 
     // Start the WIFI Application task
     xTaskCreatePinnedToCore(&lcd2004_app_task, "LCD_APP_TASK",
-                            WIFI_APP_TASK_STACK_SIZE, NULL, WIFI_APP_TASK_PRIORITY, NULL,
-                            WIFI_APP_TASK_CORE_ID);
+                            LCD_APP_TASK_STACK_SIZE, NULL, LCD_APP_TASK_PRIORITY, NULL,
+                            LCD_APP_TASK_CORE_ID);
 }
 
 // Perform initilisation functions

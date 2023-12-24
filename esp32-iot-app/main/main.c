@@ -10,6 +10,7 @@
 #include "mqtt_app.h"
 #include "gpio_app.h"
 #include "lcd2004_app.h"
+#include "mq2.h"
 void wifi_app_register_connected_events()
 {
 	mqtt_app_start();
@@ -17,7 +18,7 @@ void wifi_app_register_connected_events()
 
 /**
  * Entry point
-*/
+ */
 void app_main(void)
 {
 	// Initialize NVS
@@ -29,13 +30,14 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-	
-//lcd2004_app_start();
-	// //Start flame + warning sensor
-	gpio_app_task_start();
-	
-	// // Start DHT
-	// dht22_task_start();
+	// mq2_app_main();
+	lcd2004_app_start();
+
+	// Start flame + warning sensor
+	//gpio_app_task_start();
+
+	// Start DHT
+	dht22_task_start();
 
 	// Start Wifi
 	wifi_app_start();

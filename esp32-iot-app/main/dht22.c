@@ -32,6 +32,7 @@
 #include "DHT22.h"
 #include "tasks_common.h"
 #include "mqtt_app.h"
+#include "lcd2004_app.h"
 // == global defines =============================================
 
 static const char *TAG = "DHT";
@@ -269,6 +270,8 @@ static void dht22_task(void *pvParameter) {
 			 sprintf(temBuff,"%.1f",getTemperature());
 			 mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED,MQTT_APP_TOPIC_PUB_TEMP,strlen(MQTT_APP_TOPIC_PUB_TEMP),temBuff,6);
 		}
+
+		lcd2004_app_send_message(LCD2004_MSG_DISPLAY_TEMHUM);
 
 		// Wait at least 2 seconds before reading again
 		// The interval of the whole process must be more than 2 seconds
