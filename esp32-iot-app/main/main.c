@@ -4,7 +4,6 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
-#include "rgb_led.h"
 #include "wifi_app.h"
 #include "nvs_flash.h"
 #include "dht22.h"

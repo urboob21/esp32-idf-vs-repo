@@ -37,7 +37,6 @@ static void gpio_app_detect_fire_task()
             printf("Flame dected => the fire is detected \n");
             // vTaskResume(turnOnWarningHandle);
             gpio_set_level(GPIO_APP_PIN_BUZ, 1);
-            rgb_led_display(RGB_COLOR_RED);
         }
 
         // process isr
@@ -80,15 +79,6 @@ void gpio_app_turn_warning(bool state)
 {
     printf("Warning turn %d \n", state);
     gpio_set_level(GPIO_APP_PIN_BUZ, state);
-
-    if (state)
-    {
-        rgb_led_display(RGB_COLOR_RED);
-    }
-    else if (!state)
-    {
-        rgb_led_display(RGB_COLOR_GREEN);
-    }
 }
 
 static void reset_button_config(void)

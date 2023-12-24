@@ -18,7 +18,6 @@
 #include "freertos/FreeRTOS.h"
 
 #include "tasks_common.h"
-#include "rgb_led.h"
 #include "wifi_app.h"
 #include "http_server.h"
 #include "mqtt_app.h"
@@ -330,7 +329,6 @@ static void wifi_app_task(void *pvParameters)
 
 			case WIFI_APP_MSG_START_HTTP_SERVER:
 				ESP_LOGI(TAG, "WIFI_APP_MSG_START_HTTP_SERVER");
-				rgb_led_http_server_started();
 				http_server_start();
 				break;
 
@@ -440,9 +438,6 @@ static void wifi_app_task(void *pvParameters)
 void wifi_app_start()
 {
 	ESP_LOGI(TAG, "STARTING WIFI APPLICATION");
-
-	// RGB led display the color to indicate
-	rgb_led_wifi_app_started();
 
 	// Display default WIFI logging messages
 	esp_log_level_set("WIFI", ESP_LOG_NONE);

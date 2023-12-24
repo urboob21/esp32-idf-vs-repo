@@ -138,7 +138,6 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
         g_mqtt_connect_status = MQTT_APP_CONNECT_SUCCESS;
-        rgb_led_mqtt_connected();
         mqtt_app_send_message(MQTT_APP_MSG_CONNECTED);
         break;
 
