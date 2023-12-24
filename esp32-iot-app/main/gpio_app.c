@@ -7,6 +7,7 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "rgb_led.h"
+#include "wifi_app.h"
 
 TaskHandle_t turnOnWarningHandle = NULL;
 // Semaphore handle
@@ -44,7 +45,7 @@ static void gpio_app_detect_fire_task()
         {
 
             // Send a message to disconnect Wifi and clear credentials
-            // wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
+             wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
 
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
