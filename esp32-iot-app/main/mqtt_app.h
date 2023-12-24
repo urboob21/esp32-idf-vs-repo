@@ -5,10 +5,12 @@
 #define MQTT_APP_USER "nphong2103"
 #define MQTT_APP_PASSWORD "210301Phong"
 #define MQTT_APP_TOPIC_SUB "topic/request"
+#define MQTT_APP_TOPIC_SUB_CO "topic/sub_co"
 #define MQTT_APP_TOPIC_PUB "topic/reply"
 #define MQTT_APP_TOPIC_SUB_BUZZ "topic/request_buzz"
 #define MQTT_APP_TOPIC_PUB_TEMP "topic/push_temp"
 #define MQTT_APP_TOPIC_PUB_HUMI "topic/push_humi"
+#define MQTT_APP_TOPIC_PUB_CO "topic/push_co"
 
 /**
  * Connection status for MQTT

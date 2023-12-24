@@ -1,7 +1,7 @@
 #ifndef MAIN_MQ2_AP_H
 #define MAIN_MQ2_AP_H
 
-#define MQ2_PIN_CHANEL               5          //PIN 25       
+#define MQ2_PIN_CHANEL              3          //PIN 25       
 
 /************************Hardware Related Macros************************************/
 #define         RL_VALUE                     5     //define the load resistance on the board, in kilo ohms
@@ -29,7 +29,7 @@ float readLPG();
 float readCO();
 float readSmoke();
 void mq2_app_main();
-
+float getCop();
 
 float MQRead();
 float MQGetGasPercentage(float rs_ro_ratio, int gas_id);

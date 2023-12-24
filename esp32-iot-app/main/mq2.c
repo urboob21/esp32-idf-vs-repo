@@ -11,8 +11,14 @@
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #include "tasks_common.h"
-
+#include "mqtt_app.h"
+#include "lcd2004_app.h"
 #include "mq2.h"
+#include "string.h"
+#include "gpio_app.h"
+
+extern int g_mqtt_connect_status;
+
 /*****************************Globals***********************************************/
 float LPGCurve[3] = {2.3, 0.21, -0.47}; // two points are taken from the curve.
                                         // with these two points, a line is formed which is "approximately equivalent"
@@ -52,7 +58,7 @@ static const adc_channel_t channel = MQ2_PIN_CHANEL;
 static const adc_bits_width_t width = 10;
 
 /* No input attenumation, ADC can measure up to approx. 800 mV. */
-static const adc_atten_t atten = ADC_ATTEN_DB_0;
+static const adc_atten_t atten = ADC_ATTEN_DB_11;
 
 static esp_adc_cal_characteristics_t *adc_chars;
 
@@ -62,6 +68,10 @@ void begin()
     printf("Ro: %.2lf Kohm\n", Ro);
 }
 
+float getCop()
+{
+    return co;
+}
 /***************************** MQCalibration ****************************************
 Input:   mq_pin - analog channel
 Output:  Ro of the sensor
@@ -249,22 +259,41 @@ static void mq_app_task()
 {
     for (;;)
     {
-        // Cấp phát bộ nhớ cho con trỏ
-    adc_chars = (esp_adc_cal_characteristics_t *)malloc(sizeof(esp_adc_cal_characteristics_t));
-    lpg = MQGetGasPercentage(MQRead() / Ro, GAS_LPG);
-    co = MQGetGasPercentage(MQRead() / Ro, GAS_CO);
-    smoke = MQGetGasPercentage(MQRead() / Ro, GAS_SMOKE);
+        adc_chars = (esp_adc_cal_characteristics_t *)malloc(sizeof(esp_adc_cal_characteristics_t));
 
-        printf("[ GAS DETECTTED ]\n");
-        printf("LPG::%.2f::ppm CO::%.2f::ppm SMOKE::%.2f::ppm \n", lpg, co, smoke);
-    lastReadTime = xthal_get_ccount();
+        // lpg = MQGetGasPercentage(MQRead() / Ro, GAS_LPG);
+        // smoke = MQGetGasPercentage(MQRead() / Ro, GAS_SMOKE);
+        co = MQGetGasPercentage(MQRead() / Ro, GAS_CO);
 
-        // Giải phóng bộ nhớ khi không cần thiết nữa
-    free(adc_chars);
+        // turn warning if co tobe high
+        if (co > 50)
+        {
+            gpio_app_turn_warning(true);
+        }
 
-    // Đặt con trỏ về NULL để tránh sử dụng không cố ý
-    adc_chars = NULL;
-        vTaskDelay(200 / portTICK_PERIOD_MS);
+        // printf("LPG::%.2f::ppm CO::%.2f::ppm SMOKE::%.2f::ppm \n", lpg, co, smoke);
+        lastReadTime = xthal_get_ccount();
+
+        // Public to mqtt if connect success
+        if (g_mqtt_connect_status == MQTT_APP_CONNECT_SUCCESS)
+        {
+            if (co < 10000)
+            {
+                char coBuff[10];
+                sprintf(coBuff, "%d", (int)co);
+                mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED, MQTT_APP_TOPIC_PUB_CO, strlen(MQTT_APP_TOPIC_PUB_CO), coBuff, 11);
+            }
+            else
+            {
+                mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED, MQTT_APP_TOPIC_PUB_CO, strlen(MQTT_APP_TOPIC_PUB_CO), "10000", 5);
+            }
+        }
+
+        lcd2004_app_send_message(LCD2004_MSG_DISPLAY_CO);
+
+        free(adc_chars);
+        adc_chars = NULL;
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
@@ -274,5 +303,5 @@ void mq2_app_main()
     // Start the WIFI Application task
     xTaskCreatePinnedToCore(&mq_app_task, "LCD_APP_TASK",
                             WIFI_APP_TASK_STACK_SIZE, NULL, WIFI_APP_TASK_PRIORITY, NULL,
-                            1);
+                            0);
 }

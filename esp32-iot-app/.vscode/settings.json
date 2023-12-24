@@ -96,10 +96,11 @@
     "lcd2004_app.h": "c",
     "lcd.h": "c",
     "mq2.h": "c",
-    "esp_adc_cal.h": "c"
+    "esp_adc_cal.h": "c",
+    "config.h": "c"
   },
   "idf.flashType": "UART",
-  "idf.portWin": "COM3",
+  "idf.portWin": "COM6",
   "idf.pythonBinPathWin": "d:\\ESP_IDF_VS_TOOL\\python_env\\idf5.1_py3.11_env\\Scripts\\python.exe",
   "idf.toolsPathWin": "d:\\ESP_IDF_VS_TOOL"
 }

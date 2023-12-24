@@ -37,8 +37,7 @@ static void gpio_app_detect_fire_task()
         {
             printf("Flame dected => the fire is detected \n");
             // vTaskResume(turnOnWarningHandle);
-            gpio_set_level(GPIO_APP_PIN_BUZ, 1);
-            lcd2004_app_send_message(LCD2004_MSG_ON_WARNING);
+            gpio_app_turn_warning(true);
         }
 
         // process isr

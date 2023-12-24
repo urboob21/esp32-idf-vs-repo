@@ -8,6 +8,7 @@
 #include "config.h"
 #include "tasks_common.h"
 #include "dht22.h"
+#include "mq2.h"
 static const char *TAG = "LCD_2004";
 
 // Queue handle
@@ -26,6 +27,12 @@ BaseType_t lcd2004_app_send_message(lcd2004_app_id_message_t msgID)
     lcd2004_app_message_t msg;
     msg.msgId = msgID;
     return xQueueSend(lcd2004_app_queue_handle, &msg, portMAX_DELAY);
+}
+
+void clear_row(uint row)
+{
+    lcd_set_cursor(&lcd_handle, 0, row);
+    lcd_write_str(&lcd_handle, "                   ");
 }
 
 /**
@@ -60,16 +67,25 @@ static void lcd2004_app_task(void *pvParameters)
 
             case LCD2004_MSG_DISPLAY_TEMHUM:
                 lcd_set_cursor(&lcd_handle, 0, 1);
-                sprintf(str, "Temperature : %.1f",getTemperature());
-                lcd_write_str(&lcd_handle,str);
+                sprintf(str, "Temp (oC) : %.1f", getTemperature());
+                lcd_write_str(&lcd_handle, str);
                 lcd_set_cursor(&lcd_handle, 0, 2);
-                sprintf(str, "Humidity : %.1f",getHumidity());
-                lcd_write_str(&lcd_handle,str);
+                sprintf(str, "Humid(\%) : %.1f", getHumidity());
+                lcd_write_str(&lcd_handle, str);
+                break;
+
+            case LCD2004_MSG_DISPLAY_CO:
+                clear_row(3);
+                lcd_set_cursor(&lcd_handle, 0, 3);
+                int out = (int)getCop() < 10000 ? (int)getCop() : 10000;
+                sprintf(str, "CO (ppm) : %d", out);
+                lcd_write_str(&lcd_handle, str);
                 break;
 
             case LCD2004_MSG_ON_WARNING:
+                clear_row(0);
                 lcd_home(&lcd_handle);
-                lcd_write_str(&lcd_handle, "!!! WARNINGG !!!");
+                lcd_write_str(&lcd_handle, "!!! WARNINGG !!! ");
                 break;
 
             case LCD2004_MSG_OFF_WARNING:
@@ -82,7 +98,6 @@ static void lcd2004_app_task(void *pvParameters)
 
 void lcd2004_app_start(void)
 {
-   
 
     // Create Message Queue
     lcd2004_app_queue_handle = xQueueCreate(3, sizeof(lcd2004_app_message_t));
@@ -121,6 +136,7 @@ static void initialise(void)
     lcd_handle.columns = LCD2004_LCD_COLUMNS;
     lcd_handle.rows = LCD2004_LCD_ROWS;
     lcd_handle.backlight = LCD2004_LCD_BACKLIGHT;
+    lcd_handle.display_mode = LCD_ENTRY_DISPLAY_NO_SHIFT;
 
     // Initialise LCD
     ESP_ERROR_CHECK(lcd_init(&lcd_handle));

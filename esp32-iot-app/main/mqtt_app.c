@@ -113,6 +113,11 @@ static void mqtt_app_proccess_received_data(char *pTopicBuff, uint8_t lenTopic, 
         gpio_app_turn_warning(state);
     }
 
+        if (strcmp(strTopic, MQTT_APP_TOPIC_SUB_CO) == 0)
+    {
+        // Process data received from MQTT (CO)
+    }
+
     free(strTopic);
     free(strData);
 }
@@ -249,7 +254,7 @@ static void mqtt_app_task()
             case MQTT_APP_MSG_CONNECTED:
 
                 // when connected, subscribe the declared topics
-                msg_id = esp_mqtt_client_subscribe(mqtt_client, MQTT_APP_TOPIC_SUB, 0);
+                msg_id = esp_mqtt_client_subscribe(mqtt_client, MQTT_APP_TOPIC_SUB_CO, 0);
                 msg_id = esp_mqtt_client_subscribe(mqtt_client, MQTT_APP_TOPIC_SUB_BUZZ, 0);
 
                 break;
@@ -278,7 +283,7 @@ static void mqtt_app_task()
                 printf(topic);
                 printf(data);
 
-                char *buff = (char *)malloc(50 * sizeof(char));
+                char *buff = (char *)malloc(80 * sizeof(char));
 
                 sprintf(buff, "{\"deviceId\":\"%s\",\"data\":\"%s\"}", topic, data);
                 msg_id = esp_mqtt_client_publish(mqtt_client, topic, buff,25+msg.msgLenData+msg.msgLenTopic-1, 0, 0);
