@@ -6,6 +6,12 @@
 // input read flame sensor
 #define GPIO_APP_PIN_BUZ 19
 #define GPIO_APP_PIN_FLAME 35
+#define GPIO_APP_PIN_RESET_BUTTON 0            //user boot btn
+// Default interrupt flag
+#define ESP_INTR_FLAG_DEFAULT	0
+
+
+
 
 /**
  * Starts gpio_app task

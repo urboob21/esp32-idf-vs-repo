@@ -203,7 +203,9 @@ static void wifi_app_event_handler(void *event_handler_arg,
 
 		case WIFI_EVENT_STA_DISCONNECTED:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED");
-
+			
+			nvs_app_clear_sta_creds();
+			
 			// Disconnected the MQTT
 			mqtt_app_send_message(MQTT_APP_MSG_DISCONNECTED);
 
