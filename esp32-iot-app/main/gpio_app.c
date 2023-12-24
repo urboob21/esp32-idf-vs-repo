@@ -8,6 +8,7 @@
 #include "freertos/semphr.h"
 #include "rgb_led.h"
 #include "wifi_app.h"
+#include "lcd2004_app.h"
 
 TaskHandle_t turnOnWarningHandle = NULL;
 // Semaphore handle
@@ -37,6 +38,7 @@ static void gpio_app_detect_fire_task()
             printf("Flame dected => the fire is detected \n");
             // vTaskResume(turnOnWarningHandle);
             gpio_set_level(GPIO_APP_PIN_BUZ, 1);
+            lcd2004_app_send_message(LCD2004_MSG_ON_WARNING);
         }
 
         // process isr
@@ -44,7 +46,7 @@ static void gpio_app_detect_fire_task()
         {
 
             // Send a message to disconnect Wifi and clear credentials
-             wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
+            wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
 
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
@@ -63,7 +65,7 @@ void IRAM_ATTR wifi_reset_button_isr_handler(void *arg)
 }
 
 /**
- * task ON/OF  warning task
+ * task ON/OF  warning task - - - NODE DECRE
  */
 void gpio_app_turn_warning_task(bool state)
 {
@@ -75,10 +77,19 @@ void gpio_app_turn_warning_task(bool state)
     }
 }
 
+// Turn on off warning
 void gpio_app_turn_warning(bool state)
 {
     printf("Warning turn %d \n", state);
     gpio_set_level(GPIO_APP_PIN_BUZ, state);
+    if (state)
+    {
+        lcd2004_app_send_message(LCD2004_MSG_ON_WARNING);
+    }
+    else
+    {
+        lcd2004_app_send_message(LCD2004_MSG_OFF_WARNING);
+    }
 }
 
 static void reset_button_config(void)

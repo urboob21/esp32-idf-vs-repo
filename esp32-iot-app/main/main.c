@@ -34,7 +34,7 @@ void app_main(void)
 	lcd2004_app_start();
 
 	// Start flame + warning sensor
-	//gpio_app_task_start();
+	gpio_app_task_start();
 
 	// Start DHT
 	dht22_task_start();

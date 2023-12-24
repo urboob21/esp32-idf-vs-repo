@@ -69,11 +69,7 @@ static void lcd2004_app_task(void *pvParameters)
 
             case LCD2004_MSG_ON_WARNING:
                 lcd_home(&lcd_handle);
-                lcd_clear_screen(&lcd_handle);
-                lcd_write_str(&lcd_handle, "WARNINGG ! ! !");
-                lcd_no_backlight(&lcd_handle);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-                lcd_backlight(&lcd_handle);
+                lcd_write_str(&lcd_handle, "!!! WARNINGG !!!");
                 break;
 
             case LCD2004_MSG_OFF_WARNING:

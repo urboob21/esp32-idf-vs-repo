@@ -281,7 +281,7 @@ static void mqtt_app_task()
                 char *buff = (char *)malloc(50 * sizeof(char));
 
                 sprintf(buff, "{\"deviceId\":\"%s\",\"data\":\"%s\"}", topic, data);
-                msg_id = esp_mqtt_client_publish(mqtt_client, topic, data, msg.msgLenData + 1, 0, 0);
+                msg_id = esp_mqtt_client_publish(mqtt_client, topic, buff,25+msg.msgLenData+msg.msgLenTopic-1, 0, 0);
 
                 // Don't forget to free the allocated memory when you are done using the strings
                 free(topic);
