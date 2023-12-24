@@ -7,7 +7,7 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
-
+#include "cJSON.h"
 #include "mqtt_client.h"
 #include "esp_ota_ops.h"
 #include <sys/param.h>
@@ -18,10 +18,12 @@
 #include "esp_tls.h"
 #include "gpio_app.h"
 #include "rgb_led.h"
+#include "lcd2004_app.h"
 
 // Tag used for ESP Serial Console Message
 static const char TAG[] = "MQTT Application";
 
+int coResult;
 // Task Handle
 TaskHandle_t tHandler_mqtt_app = NULL;
 
@@ -82,6 +84,37 @@ BaseType_t mqtt_app_send_message_with(mqtt_app_message_id_e msgId, char *topic, 
     return xQueueSend(mqtt_app_queue_handle, &msg, portMAX_DELAY);
 }
 
+int setValue(char* str){
+    // Phân tích chuỗi JSON
+    cJSON *root = cJSON_Parse(str);
+
+    if (root == NULL) {
+        fprintf(stderr, "Error parsing JSON: %s\n", cJSON_GetErrorPtr());
+        return 1;
+    }
+
+    // Lấy giá trị của "data"
+    cJSON *data_obj = cJSON_GetObjectItemCaseSensitive(root, "data");
+    if (data_obj != NULL && cJSON_IsString(data_obj)) {
+        const char *data_value = data_obj->valuestring;
+
+        // Xử lý chuỗi để lấy giá trị số
+        int result;
+        if (sscanf(data_value, "%d", &result) == 1) {
+            printf("Kết quả là: %d\n", result);
+            coResult= result;
+            lcd2004_app_send_message(LCD2004_MSG_DISPLAY_CO);
+        } else {
+            printf("Không thể trích xuất giá trị.\n");
+        }
+    } else {
+        printf("Không tìm thấy khóa 'data' hoặc giá trị không phải là chuỗi.\n");
+    }
+
+    // Giải phóng bộ nhớ
+    cJSON_Delete(root);
+    return 0;
+}
 /**
  * Proccess received mqtt data from specific topic
  */
@@ -116,6 +149,7 @@ static void mqtt_app_proccess_received_data(char *pTopicBuff, uint8_t lenTopic, 
         if (strcmp(strTopic, MQTT_APP_TOPIC_SUB_CO) == 0)
     {
         // Process data received from MQTT (CO)
+        setValue(strData);
     }
 
     free(strTopic);

@@ -9,6 +9,7 @@
 #include "tasks_common.h"
 #include "dht22.h"
 #include "mq2.h"
+#include "mqtt_app.h"
 static const char *TAG = "LCD_2004";
 
 // Queue handle
@@ -16,7 +17,7 @@ static QueueSetHandle_t lcd2004_app_queue_handle;
 
 static void initialise(void);
 static void lcd_demo(void);
-
+extern int coResult;
 lcd_handle_t lcd_handle = LCD_HANDLE_DEFAULT_CONFIG();
 
 /**
@@ -77,8 +78,8 @@ static void lcd2004_app_task(void *pvParameters)
             case LCD2004_MSG_DISPLAY_CO:
                 clear_row(3);
                 lcd_set_cursor(&lcd_handle, 0, 3);
-                int out = (int)getCop() < 10000 ? (int)getCop() : 10000;
-                sprintf(str, "CO (ppm) : %d", out);
+               // int out = (int)getCop() < 10000 ? (int)getCop() : 10000;
+                sprintf(str, "CO (ppm) : %d", coResult);
                 lcd_write_str(&lcd_handle, str);
                 break;
 

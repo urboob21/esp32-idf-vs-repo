@@ -97,7 +97,9 @@
     "lcd.h": "c",
     "mq2.h": "c",
     "esp_adc_cal.h": "c",
-    "config.h": "c"
+    "config.h": "c",
+    "esp_netif.h": "c",
+    "cjson.h": "c"
   },
   "idf.flashType": "UART",
   "idf.portWin": "COM3",
