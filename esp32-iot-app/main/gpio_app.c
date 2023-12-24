@@ -24,6 +24,9 @@ static void gpio_app_config()
     // Buzz warning config
     gpio_set_direction(GPIO_APP_PIN_BUZ, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIO_APP_PIN_BUZ, 0);
+
+    // Btn config
+    gpio_set_direction(GPIO_APP_PIN_BTN, GPIO_MODE_INPUT);
 }
 
 /**
@@ -33,23 +36,26 @@ static void gpio_app_detect_fire_task()
 {
     for (;;)
     {
-        if (!gpio_get_level(GPIO_APP_PIN_FLAME) == 0)
+        if (gpio_get_level(GPIO_APP_PIN_FLAME) == 0)
         {
             printf("Flame dected => the fire is detected \n");
             // vTaskResume(turnOnWarningHandle);
             gpio_app_turn_warning(true);
         }
+        vTaskDelay(200 / portTICK_PERIOD_MS);
 
-        // process isr
-        if (xSemaphoreTake(reset_semphore, portMAX_DELAY) == pdTRUE)
+        if (gpio_get_level(GPIO_APP_PIN_BTN) == 0)
         {
-
-            // Send a message to disconnect Wifi and clear credentials
-            wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
-
-            vTaskDelay(2000 / portTICK_PERIOD_MS);
+            gpio_app_turn_warning(false);
         }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+
+        // // process isr
+        // if (xSemaphoreTake(reset_semphore, portMAX_DELAY) == pdTRUE)
+        // {
+        //     // Send a message to disconnect Wifi and clear credentials
+        //     wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
+        // }
+        
     }
 }
 
@@ -83,11 +89,11 @@ void gpio_app_turn_warning(bool state)
     gpio_set_level(GPIO_APP_PIN_BUZ, state);
     if (state)
     {
-        lcd2004_app_send_message(LCD2004_MSG_ON_WARNING);
+       // lcd2004_app_send_message(LCD2004_MSG_ON_WARNING);
     }
     else
     {
-        lcd2004_app_send_message(LCD2004_MSG_OFF_WARNING);
+        //lcd2004_app_send_message(LCD2004_MSG_OFF_WARNING);
     }
 }
 
@@ -117,9 +123,10 @@ void gpio_app_task_start(void)
 {
     printf("Start flame & buz \n");
     gpio_app_config();
-    reset_button_config();
+   // reset_button_config();
     xTaskCreatePinnedToCore(&gpio_app_detect_fire_task, "gpio_app_task", GPIO_APP_TASK_STACK_SIZE,
                             NULL, GPIO_APP_TASK_PRIORITY, NULL, GPIO_APP_TASK_CORE_ID);
+
     // xTaskCreatePinnedToCore(&gpio_app_turn_on_warning_task, "gpio_app_task", GPIO_APP_TASK_STACK_SIZE,
     //                         NULL, GPIO_APP_TASK_PRIORITY, &turnOnWarningHandle, GPIO_APP_TASK_CORE_ID);
 }
