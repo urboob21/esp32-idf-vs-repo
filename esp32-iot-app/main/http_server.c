@@ -21,7 +21,7 @@
 #include "wifi_app.h"
 #include "esp_timer.h"
 
-static const char TAG[] = "___HTTP_SERVER___";
+static const char TAG[] = "HTTP Server application";
 
 // Wifi connect status
 static int g_wifi_connect_status = NONE;
@@ -35,6 +35,7 @@ void http_server_fw_update_reset_callback(void *arg)
 			 "http_server_fw_update_reset_callback: Timer timed-out, restarting the device");
 	esp_restart();
 }
+
 // ESP32 timer configuration passed to esp_timer_create
 const esp_timer_create_args_t fw_update_reset_args = {.callback =
 														  &http_server_fw_update_reset_callback,
@@ -73,14 +74,6 @@ extern const uint8_t app_css_end[] asm("_binary_app_css_end");
 
 extern const uint8_t favicon_ico_start[] asm("_binary_favicon_ico_start");
 extern const uint8_t favicon_ico_end[] asm("_binary_favicon_ico_end");
-
-/***
- *
- *
- *
- *
- *
- */
 
 /**
  * HTTP Sever monitor send message
@@ -152,6 +145,13 @@ static void http_server_monitor()
 				g_wifi_connect_status = HTTP_WIFI_STATUS_CONNECT_FAILED;
 				break;
 
+			case HTTP_MSG_WIFI_USER_DISCONNECT:
+				ESP_LOGI(TAG, "HTTP_MSG_WIFI_USER_DISCONNECT");
+
+				g_wifi_connect_status = HTTP_WIFI_STATUS_DISCONNECTED;
+
+				break;
+
 			case HTTP_MSG_OTA_UPDATE_SUCCESSFUL:
 				ESP_LOGI(TAG, "HTTP_MSG_OTA_UPDATE_SUCCESSFUL");
 				g_fw_update_status = OTA_UPDATE_SUCCESSFUL;
@@ -185,7 +185,7 @@ static esp_err_t http_server_jquery_handler(httpd_req_t *r)
 }
 
 /**
- * Send index.html page
+ * Send index.html Webpage
  */
 static esp_err_t http_server_html_handler(httpd_req_t *r)
 {
@@ -225,6 +225,9 @@ static esp_err_t http_server_js_handler(httpd_req_t *r)
 	return ESP_OK;
 }
 
+/**
+ * repspond icon web page
+*/
 static esp_err_t http_server_ico_handler(httpd_req_t *r)
 {
 	ESP_LOGI(TAG, "ICO requested");

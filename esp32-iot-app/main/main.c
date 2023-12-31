@@ -4,23 +4,21 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
-#include "rgb_led.h"
 #include "wifi_app.h"
 #include "nvs_flash.h"
 #include "dht22.h"
 #include "mqtt_app.h"
-
-// GIT CHECK COMMIT
-void wifi_app_connected_events()
+#include "gpio_app.h"
+#include "lcd2004_app.h"
+#include "mq2.h"
+void wifi_app_register_connected_events()
 {
-	// to do some thing
 	mqtt_app_start();
-
 }
 
 /**
  * Entry point
-*/
+ */
 void app_main(void)
 {
 	// Initialize NVS
@@ -32,12 +30,19 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
+	lcd2004_app_start();
+
+	// Start flame + warning sensor
+	gpio_app_task_start();
+
+	// Start DHT
+	dht22_task_start();
+
+	// Register the funtion callback MQTT when connected successfully wifi host
+	wifi_app_set_callback(*wifi_app_register_connected_events);
+	
 	// Start Wifi
 	wifi_app_start();
 
-	// Start DHT
-	//DHT22_task_start();
 
-	// Register the funtion callback MQTT when connected successfully wifi host
-	wifi_app_set_callback(*wifi_app_connected_events);
 }

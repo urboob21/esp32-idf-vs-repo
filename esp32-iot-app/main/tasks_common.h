@@ -13,7 +13,7 @@
 #define WIFI_APP_TASK_PRIORITY 5
 #define WIFI_APP_TASK_CORE_ID 0
 
-// HTTP Server task (process from server ??)
+// HTTP Server task (pub/sub from HTTP Server)
 #define HTTP_SERVER_TASK_STACK_SIZE 8192
 #define HTTP_SERVER_TASK_PRIORITY 4
 #define HTTP_SERVER_TASK_CORE_ID 0
@@ -28,9 +28,25 @@
 #define DHT22_TASK_PRIORITY 5
 #define DHT22_TASK_CORE_ID 1
 
+// MQ2 sensor tsk
+#define MQX_TASK_STACK_SIZE 4096
+#define MQX_TASK_PRIORITY 5
+#define MQX_TASK_CORE_ID_1 1
+
+// GPIO app task
+#define GPIO_APP_TASK_STACK_SIZE 4096
+#define GPIO_APP_TASK_PRIORITY 5
+#define GPIO_APP_TASK_CORE_ID 1
+
+
 // MQTT App task
 #define MQTT_APP_TASK_STACK_SIZE 5120
 #define MQTT_APP_TASK_PRIORITY 6
 #define MQTT_APP_TASK_CORE_ID 1
+
+// LCD App task
+#define LCD_APP_TASK_STACK_SIZE 4096
+#define LCD_APP_TASK_PRIORITY 7
+#define LCD_APP_TASK_CORE_ID 0
 
 #endif /* MAIN_TASKS_COMMON_H_ */

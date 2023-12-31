@@ -125,7 +125,7 @@ function getDHTSensorValues() {
  * Sets the interval for getting the updated DHT22 sensor values.
  */
 function startDHTSensorInterval() {
-	setInterval(getDHTSensorValues, 5000);
+	setInterval(getDHTSensorValues, 2000);
 }
 
 /**

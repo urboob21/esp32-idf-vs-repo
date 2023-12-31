@@ -31,13 +31,17 @@ typedef void (*wifi_connected_event_callback_t)(void);
 
 extern esp_netif_t *esp_netif_sta;
 
+/**
+ * Define msgId for message
+*/
 typedef enum
 {
-	WIFI_APP_MSG_START_HTTP_SERVER = 0,
-	WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER,
-	WIFI_APP_MSG_STA_CONNECTED_GOT_IP,
-	WIFI_APP_MSG_STA_DISCONNECTED,
-	WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT
+	WIFI_APP_MSG_START_HTTP_SERVER = 0,			// default start
+	WIFI_APP_MSG_CONNECTING_FROM_HTTP_SERVER, // when press Btn Connect on web-config-local
+	WIFI_APP_MSG_STA_CONNECTED_GOT_IP, 		 // when connect with station
+	WIFI_APP_MSG_STA_DISCONNECTED,			
+	WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS,	// when request load 
+	WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT 	// when press Btn Disconnect 
 } wifi_app_message_t;
 
 /**

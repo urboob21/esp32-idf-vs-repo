@@ -16,7 +16,7 @@
 /**
  * Starts DHT22 sensor task
  */
-void DHT22_task_start(void);
+void dht22_task_start(void);
 
 // == function prototypes =======================================
 

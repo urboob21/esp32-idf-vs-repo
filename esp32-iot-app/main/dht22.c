@@ -20,6 +20,9 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stddef.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -28,34 +31,43 @@
 #include "dht22.h"
 #include "DHT22.h"
 #include "tasks_common.h"
-
+#include "mqtt_app.h"
+#include "lcd2004_app.h"
+#include "gpio_app.h"
 // == global defines =============================================
 
 static const char *TAG = "DHT";
 
-int DHTgpio = 4;				// my default DHT pin = 4
+int DHTgpio = 4; // my default DHT pin = 4
 float humidity = 0.;
 float temperature = 0.;
 
+extern int g_mqtt_connect_status;
+
 // == set the DHT used pin=========================================
 
-void setDHTgpio(int gpio) {
+void setDHTgpio(int gpio)
+{
 	DHTgpio = gpio;
 }
 
 // == get temp & hum =============================================
 
-float getHumidity() {
+float getHumidity()
+{
 	return humidity;
 }
-float getTemperature() {
+float getTemperature()
+{
 	return temperature;
 }
 
 // == error handler ===============================================
 
-void errorHandler(int response) {
-	switch (response) {
+void errorHandler(int response)
+{
+	switch (response)
+	{
 
 	case DHT_TIMEOUT_ERROR:
 		ESP_LOGE(TAG, "Sensor Timeout\n");
@@ -82,16 +94,18 @@ void errorHandler(int response) {
  ;
  ;--------------------------------------------------------------------------------*/
 
-int getSignalLevel(int usTimeOut, bool state) {
+int getSignalLevel(int usTimeOut, bool state)
+{
 
 	int uSec = 0;
-	while (gpio_get_level(DHTgpio) == state) {
+	while (gpio_get_level(DHTgpio) == state)
+	{
 
 		if (uSec > usTimeOut)
 			return -1;
 
 		++uSec;
-		esp_rom_delay_us(1);		// uSec delay
+		esp_rom_delay_us(1); // uSec delay
 	}
 
 	return uSec;
@@ -137,9 +151,10 @@ int getSignalLevel(int usTimeOut, bool state) {
 
  ;----------------------------------------------------------------------------*/
 
-#define MAXdhtData 5	// to complete 40 = 5*8 Bits
+#define MAXdhtData 5 // to complete 40 = 5*8 Bits
 
-int readDHT() {
+int readDHT()
+{
 	int uSec = 0;
 
 	uint8_t dhtData[MAXdhtData];
@@ -161,25 +176,26 @@ int readDHT() {
 	gpio_set_level(DHTgpio, 1);
 	esp_rom_delay_us(25);
 
-	gpio_set_direction(DHTgpio, GPIO_MODE_INPUT);		// change to input mode
+	gpio_set_direction(DHTgpio, GPIO_MODE_INPUT); // change to input mode
 
 	// == DHT will keep the line low for 80 us and then high for 80us ====
 
 	uSec = getSignalLevel(85, 0);
-//	ESP_LOGI( TAG, "Response = %d", uSec );
+	//	ESP_LOGI( TAG, "Response = %d", uSec );
 	if (uSec < 0)
 		return DHT_TIMEOUT_ERROR;
 
 	// -- 80us up ------------------------
 
 	uSec = getSignalLevel(85, 1);
-//	ESP_LOGI( TAG, "Response = %d", uSec );
+	//	ESP_LOGI( TAG, "Response = %d", uSec );
 	if (uSec < 0)
 		return DHT_TIMEOUT_ERROR;
 
 	// == No errors, read the 40 data bits ================
 
-	for (int k = 0; k < 40; k++) {
+	for (int k = 0; k < 40; k++)
+	{
 
 		// -- starts new data transmission with >50us low signal
 
@@ -197,41 +213,43 @@ int readDHT() {
 		// since all dhtData array where set to 0 at the start,
 		// only look for "1" (>28us us)
 
-		if (uSec > 40) {
+		if (uSec > 40)
+		{
 			dhtData[byteInx] |= (1 << bitInx);
 		}
 
 		// index to next byte
 
-		if (bitInx == 0) {
+		if (bitInx == 0)
+		{
 			bitInx = 7;
 			++byteInx;
-		} else
+		}
+		else
 			bitInx--;
 	}
 
 	// == get humidity from Data[0] and Data[1] ==========================
 
 	humidity = dhtData[0];
-	humidity *= 0x100;					// >> 8
+	humidity *= 0x100; // >> 8
 	humidity += dhtData[1];
-	humidity /= 10;						// get the decimal
+	humidity /= 10; // get the decimal
 
 	// == get temp from Data[2] and Data[3]
 
 	temperature = dhtData[2] & 0x7F;
-	temperature *= 0x100;				// >> 8
+	temperature *= 0x100; // >> 8
 	temperature += dhtData[3];
 	temperature /= 10;
 
-	if (dhtData[2] & 0x80) 			// negative temp, brrr it's freezing
+	if (dhtData[2] & 0x80) // negative temp, brrr it's freezing
 		temperature *= -1;
 
 	// == verify if checksum is ok ===========================================
 	// Checksum is the sum of Data 8 bits masked out 0xFF
 
-	if (dhtData[4]
-			== ((dhtData[0] + dhtData[1] + dhtData[2] + dhtData[3]) & 0xFF))
+	if (dhtData[4] == ((dhtData[0] + dhtData[1] + dhtData[2] + dhtData[3]) & 0xFF))
 		return DHT_OK;
 
 	else
@@ -241,27 +259,46 @@ int readDHT() {
 /**
  * DHT22 Sensor task
  */
-static void DHT22_task(void *pvParameter) {
+static void dht22_task(void *pvParameter)
+{
 	setDHTgpio(DHT_GPIO);
 	printf("Starting DHT task\n\n");
 
-	for (;;) {
+	for (;;)
+	{
 		printf("=== Reading DHT ===\n");
 		int ret = readDHT();
 
 		errorHandler(ret);
-
+		if (getTemperature() > 54)
+		{
+			gpio_app_turn_warning(true);
+		}
 		printf("Hum %.1f\n", getHumidity());
 		printf("Tmp %.1f\n", getTemperature());
 
+		// Public to mqtt if connect success
+		if (g_mqtt_connect_status == MQTT_APP_CONNECT_SUCCESS)
+		{
+			char humiBuff[5];
+			sprintf(humiBuff, "%.1f", getHumidity());
+			mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED, MQTT_APP_TOPIC_PUB_HUMI, strlen(MQTT_APP_TOPIC_PUB_HUMI), humiBuff, 6);
+
+			char temBuff[5];
+			sprintf(temBuff, "%.1f", getTemperature());
+			mqtt_app_send_message_with(MQTT_APP_MSG_PUBLISHED, MQTT_APP_TOPIC_PUB_TEMP, strlen(MQTT_APP_TOPIC_PUB_TEMP), temBuff, 6);
+		}
+
+		lcd2004_app_send_message(LCD2004_MSG_DISPLAY_TEMHUM);
+
 		// Wait at least 2 seconds before reading again
 		// The interval of the whole process must be more than 2 seconds
-		vTaskDelay(4000 / portTICK_PERIOD_MS);
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
 	}
 }
 
-void DHT22_task_start(void) {
-	xTaskCreatePinnedToCore(&DHT22_task, "DHT22_task", DHT22_TASK_STACK_SIZE,
-			NULL, DHT22_TASK_PRIORITY, NULL, DHT22_TASK_CORE_ID);
+void dht22_task_start(void)
+{
+	xTaskCreatePinnedToCore(&dht22_task, "DHT22_task", DHT22_TASK_STACK_SIZE,
+							NULL, DHT22_TASK_PRIORITY, NULL, DHT22_TASK_CORE_ID);
 }
-
